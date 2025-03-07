@@ -1,0 +1,9 @@
+{
+  "personalrules.command.personalrule.list.empty": "No personal rules were set",
+  "personalrules.command.personalrule.list.head": "Active personal rules:",
+  "personalrules.command.personalrule.list.rule": "- %s [%s] (gamerule: %s)",
+  "personalrules.command.personalrule.query": "Personal rule %s is currently set to: %s (gamerule: %s)",
+  "personalrules.command.personalrule.set": "Personal rule %s is now set to: %s (gamerule: %s)",
+  "personalrules.command.personalrule.activated": "Personal rule %s is activated and currently set to: %s (gamerule: %s)",
+  "personalrules.command.personalrule.deactivated": "Personal rule %s is deactivated (gamerule: %s)"
+}

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "personalrules",
+  "version": "${version}",
+  "name": "Personal rules",
+  "description": "Gamerules, but personal!",
+  "authors": [
+    "rvbsm"
+  ],
+  "contact": {
+    "sources": "https://github.com/rvbsm/personalrules",
+    "issues": "https://github.com/rvbsm/personalrules/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/personalrules/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.rvbsm.personalrules.PersonalRulesMod"
+    ]
+  },
+  "mixins": [
+    "personalrules.mixins.json"
+  ],
+  "depends": {
+    "java": ">=${javaVersion}",
+    "minecraft": ">=${minecraftVersion}",
+    "fabricloader": ">=0.16.0"
+  }
+}

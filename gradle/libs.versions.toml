@@ -1,0 +1,12 @@
+[versions]
+fabric-loom = "1.10-SNAPSHOT"
+fabric-loader = "0.16.10"
+
+mod-publish = "0.8.3"
+
+[plugins]
+fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
+publish = { id = "me.modmuss50.mod-publish-plugin", version.ref = "mod-publish" }
+
+[libraries]
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }

@@ -1,0 +1,41 @@
+{
+  "required": true,
+  "package": "dev.rvbsm.personalrules.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "CommandManagerMixin",
+    "MinecraftServerMixin",
+    "rules.AngerableMixin_forgiveDeadPlayer",
+    "rules.AnimalEntityMixin_doMobLoot",
+    "rules.BeehiveBlockMixin_doTileDrops",
+    "rules.BlockMixin_doTileDrop",
+    "rules.DefeatTargetTaskMixin_forgiveDeadPlayer",
+    "rules.EnderPearlEntityMixin_enderPearlsVanishOnDeath",
+    "rules.ForgetAngryAtTargetTaskMixin_forgiveDeadPlayer",
+    "rules.GameRulesAccess",
+    "rules.GameRulesAccess$RuleAccess",
+    "rules.GameRulesAccess$TypeAccess",
+    "rules.HungerManagerMixin_naturalRegeneration",
+    "rules.ItemFrameEntityMixin_doEntityDrops",
+    "rules.LeashableMixin_doEntityDrops",
+    "rules.LivingEntityMixin_doMobLoot",
+    "rules.NetherPortalBlockMixin_playersNetherPortalDelay",
+    "rules.PaintingEntityMixin_doEntityDrops",
+    "rules.PatrolSpawnerMixin_doPatrolSpawning",
+    "rules.PhantomSpawnerMixin_doInsomnia",
+    "rules.PlayerEntityMixin_asteriskDamage",
+    "rules.PlayerEntityMixin_keepInventory",
+    "rules.ProjectileEntityMixin_projectilesCanBreakBlocks",
+    "rules.RaidManagerMixin_disableRaids",
+    "rules.RaidMixin_disableRaids",
+    "rules.SculkShriekerBlockEntityMixin_doWardenSpawning",
+    "rules.ServerPlayerEntityMixin_forgiveDeadPlayer",
+    "rules.ServerPlayerEntityMixin_keepInventory",
+    "rules.ServerPlayerEntityMixin_naturalRegeneration",
+    "rules.ServerPlayerEntityMixin_personalRules",
+    "rules.WanderingTraderManagerMixin_doTraderSpawning"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
