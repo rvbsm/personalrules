@@ -1,95 +1,53 @@
 package dev.rvbsm.personalrules.command;
 
-import net.minecraft.command.CommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.world.GameRules;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
-import dev.rvbsm.personalrules.PersonalRulesManager;
+import dev.rvbsm.personalrules.PersonalRulesMod;
 import dev.rvbsm.personalrules.PersonalRulesTranslation;
 import dev.rvbsm.personalrules.api.PersonalRulesAccess;
 import dev.rvbsm.personalrules.mixin.rules.GameRulesAccess;
+import dev.rvbsm.personalrules.player.PersonalRules;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 public final class PersonalRuleCommand {
 
     public static void register(
-        CommandDispatcher<ServerCommandSource> dispatcher
+        CommandDispatcher<ServerCommandSource> dispatcher,
+        CommandRegistryAccess registryAccess
     ) {
         final LiteralArgumentBuilder<ServerCommandSource> commandBuilder = CommandManager.literal("personalrule")
-            .requires(src -> src.isExecutedByPlayer() &&
-                src.hasPermissionLevel(PersonalRulesManager.getCommandPermissionLevel()));
+            .requires(src -> PersonalRulesMod.getInstance().getPersonalRulesManager().hasPermissionLevel(src));
 
-        commandBuilder.executes(ctx -> executeList(ctx.getSource()))
-            .then(CommandManager.literal("remove")
-                .then(CommandManager.argument("personalrule", StringArgumentType.word())
-                    .suggests((ctx, b) -> ruleSuggestions(ctx.getSource(), b))
-                    .executes(ctx -> executeRemove(ctx.getSource(), getFromArgument(ctx, "personalrule")))))
-            .then(CommandManager.argument("personalrule", StringArgumentType.word())
-                .suggests((ctx, b) -> ruleSuggestions(ctx.getSource(), b))
-                .executes(ctx -> executeQuery(ctx.getSource(), getFromArgument(ctx, "personalrule")))
-                .then(CommandManager.argument("value", StringArgumentType.word())
-                    .suggests((ctx, b) -> valueSuggestions(ctx, "personalrule", b))
-                    .executes(ctx -> executeSet(ctx, getFromArgument(ctx, "personalrule")))));
+        new GameRules(registryAccess.getEnabledFeatures()).accept(new GameRules.Visitor() {
+            @Override
+            public <T extends GameRules.Rule<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
+                if (PersonalRules.SUPPORTED_RULES.contains(key)) {
+                    commandBuilder.then(CommandManager.literal(key.getName())
+                        .requires(src -> PersonalRulesMod.getInstance()
+                            .getPersonalRulesManager()
+                            .hasPermissionLevel(src, key))
+                        .executes(ctx -> executeQuery(ctx.getSource(), key))
+                        .then(type.argument("value").executes(ctx -> executeApply(ctx, key)))
+                        .then(CommandManager.literal("reset").executes(ctx -> executeRevoke(ctx.getSource(), key))));
+                }
+            }
+        });
 
         dispatcher.register(commandBuilder);
     }
 
-    private static GameRules.Key<?> getFromArgument(CommandContext<ServerCommandSource> ctx, String name) {
-        final String rule = StringArgumentType.getString(ctx, name);
-        return PersonalRulesManager.SUPPORTED_KEYS.get(rule);
-    }
-
-    private static void setFromArgument(GameRules.Rule<?> rule, CommandContext<ServerCommandSource> ctx, String name) {
-        final String value = StringArgumentType.getString(ctx, name);
-
-        switch (rule) {
-            case GameRules.BooleanRule booleanRule -> booleanRule.set(Boolean.parseBoolean(value), null);
-            case GameRules.IntRule intRule -> intRule.set(Integer.parseInt(value, 10), null);
-
-            default -> throw new IllegalArgumentException("Tried to modify unknown rule type");
-        }
-    }
-
-    private static CompletableFuture<Suggestions> ruleSuggestions(ServerCommandSource src, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(
-            PersonalRulesManager.getPersonalRules()
-                .entrySet()
-                .stream()
-                .filter(entry -> src.hasPermissionLevel(entry.getValue()))
-                .map(entry -> entry.getKey().getName()), builder);
-    }
-
-    private static CompletableFuture<Suggestions> valueSuggestions(
-        CommandContext<ServerCommandSource> ctx,
-        String name,
-        SuggestionsBuilder builder
-    ) {
-        final GameRules.Key<?> key = getFromArgument(ctx, name);
-        final GameRules.Type<?> type = GameRulesAccess.getRuleTypes().get(key);
-        final ArgumentType<?> argumentType = ((GameRulesAccess.TypeAccess) type).getArgumentType().get();
-
-        return argumentType.listSuggestions(ctx, builder);
-    }
-
-    private static <T extends GameRules.Rule<T>> int executeSet(
+    private static <T extends GameRules.Rule<T>> int executeApply(
         CommandContext<ServerCommandSource> ctx,
         GameRules.Key<T> key
     ) {
@@ -97,13 +55,13 @@ public final class PersonalRuleCommand {
         final ServerPlayerEntity player = src.getPlayer();
         final ServerWorld world = src.getWorld();
 
-        final Optional<T> personalRule = ((PersonalRulesAccess) player).personalrules$getPersonalRules().addRule(key);
+        final Optional<T> personalRule = ((PersonalRulesAccess) player).personalrules$getPersonalRules().applyRule(key);
         final T gameRule = world.getGameRules().get(key);
 
         personalRule.ifPresentOrElse(
             rule -> {
-                setFromArgument(rule, ctx, "value");
-                ((PersonalRulesAccess) player).personalrules$getPersonalRules().update(key, rule);
+                ((GameRulesAccess.RuleAccess) rule).callSetFromArgument(ctx, "value");
+                PersonalRules.changed(player, key, rule);
 
                 src.sendMessage(PersonalRulesTranslation.translatable(
                     "command",
@@ -121,13 +79,13 @@ public final class PersonalRuleCommand {
         return personalRule.map(GameRules.Rule::getCommandResult).orElse(0);
     }
 
-    private static <T extends GameRules.Rule<T>> int executeRemove(ServerCommandSource src, GameRules.Key<T> key) {
+    private static <T extends GameRules.Rule<T>> int executeRevoke(ServerCommandSource src, GameRules.Key<T> key) {
         final ServerPlayerEntity player = src.getPlayer();
         final ServerWorld world = src.getWorld();
 
-        ((PersonalRulesAccess) player).personalrules$getPersonalRules().removeRule(key);
+        ((PersonalRulesAccess) player).personalrules$getPersonalRules().revokeRule(key);
         final T gameRule = world.getGameRules().get(key);
-        ((PersonalRulesAccess) player).personalrules$getPersonalRules().update(key, gameRule);
+        PersonalRules.changed(player, key, gameRule);
 
         src.sendMessage(PersonalRulesTranslation.translatable(
             "command",
@@ -159,37 +117,5 @@ public final class PersonalRuleCommand {
                 gameRule.toString())));
 
         return personalRule.map(GameRules.Rule::getCommandResult).orElse(0);
-    }
-
-    private static int executeList(ServerCommandSource src) {
-        final ServerPlayerEntity player = src.getPlayer();
-        final ServerWorld world = src.getWorld();
-
-        final Map<GameRules.Key<?>, GameRules.Rule<?>> rules = ((PersonalRulesAccess) player).personalrules$getPersonalRules()
-            .getRules();
-
-        if (rules.isEmpty()) {
-            src.sendError(PersonalRulesTranslation.translatable("command", "personalrule.list.empty"));
-            return 0;
-        }
-
-        final MutableText message = Text.empty();
-        message.append(PersonalRulesTranslation.translatable("command", "personalrule.list.head")
-            .formatted(Formatting.BOLD));
-
-        rules.forEach((key, rule) -> {
-            message.append("\n");
-
-            final GameRules.Rule<?> gameRule = world.getGameRules().get(key);
-            message.append(PersonalRulesTranslation.translatable(
-                "command",
-                "personalrule.list.rule",
-                key.getName(),
-                rule.toString(),
-                gameRule.toString()));
-        });
-
-        src.sendMessage(message);
-        return rules.size();
     }
 }

@@ -1,6 +1,8 @@
 package dev.rvbsm.personalrules.player;
 
+import net.minecraft.entity.EntityStatuses;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -12,7 +14,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-import dev.rvbsm.personalrules.PersonalRulesManager;
 import dev.rvbsm.personalrules.mixin.rules.GameRulesAccess;
 
 import com.google.common.collect.ImmutableMap;
@@ -22,8 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 public final class PersonalRules {
 
-    public static final PersonalRules EMPTY = new PersonalRules(null, ImmutableMap.of(), FeatureSet.empty());
-
     public static final Set<GameRules.Key<?>> SUPPORTED_RULES = ImmutableSet.of(
         GameRules.KEEP_INVENTORY,
         GameRules.DO_MOB_LOOT,
@@ -31,6 +30,8 @@ public final class PersonalRules {
         GameRules.DO_TILE_DROPS,
         GameRules.DO_ENTITY_DROPS,
         GameRules.NATURAL_REGENERATION,
+        GameRules.REDUCED_DEBUG_INFO,
+        GameRules.DO_LIMITED_CRAFTING,
         GameRules.DISABLE_RAIDS,
         GameRules.DO_INSOMNIA,
         GameRules.DO_IMMEDIATE_RESPAWN,
@@ -46,39 +47,51 @@ public final class PersonalRules {
         GameRules.FORGIVE_DEAD_PLAYERS,
         GameRules.ENDER_PEARLS_VANISH_ON_DEATH);
 
-    private static final Map<GameRules.Key<?>, BiConsumer<ServerPlayerEntity, GameRules.Rule<?>>> RULES_CALLBACKS = ImmutableMap.of(
-        GameRules.DO_IMMEDIATE_RESPAWN, (player, rule) -> player.networkHandler.sendPacket(new GameStateChangeS2CPacket(
-            GameStateChangeS2CPacket.IMMEDIATE_RESPAWN,
-            ((GameRules.BooleanRule) rule).get() ? 1.0F : GameStateChangeS2CPacket.DEMO_OPEN_SCREEN)));
+    private static final Map<GameRules.Key<?>, BiConsumer<ServerPlayerEntity, GameRules.Rule<?>>> RULES_CALLBACKS = ImmutableMap.ofEntries(
+        Map.entry(
+            GameRules.REDUCED_DEBUG_INFO, (player, rule) -> player.networkHandler.sendPacket(new EntityStatusS2CPacket(
+                player,
+                ((GameRules.BooleanRule) rule).get() ? EntityStatuses.USE_REDUCED_DEBUG_INFO : EntityStatuses.USE_FULL_DEBUG_INFO))),
 
-    private final @Nullable ServerPlayerEntity owner;
+        Map.entry(
+            GameRules.DO_LIMITED_CRAFTING,
+            (player, rule) -> player.networkHandler.sendPacket(new GameStateChangeS2CPacket(
+                GameStateChangeS2CPacket.LIMITED_CRAFTING_TOGGLED,
+                ((GameRules.BooleanRule) rule).get() ? 1.0F : GameStateChangeS2CPacket.DEMO_OPEN_SCREEN))),
+
+        Map.entry(
+            GameRules.DO_IMMEDIATE_RESPAWN,
+            (player, rule) -> player.networkHandler.sendPacket(new GameStateChangeS2CPacket(
+                GameStateChangeS2CPacket.IMMEDIATE_RESPAWN,
+                ((GameRules.BooleanRule) rule).get() ? 1.0F : GameStateChangeS2CPacket.DEMO_OPEN_SCREEN))));
+
     private final Map<GameRules.Key<?>, GameRules.Rule<?>> rules;
     private final Set<GameRules.Key<?>> appliedRules;
     private final FeatureSet enabledFeatures;
 
-    public PersonalRules(ServerPlayerEntity owner, FeatureSet enabledFeatures, DynamicLike<?> values) {
-        this(owner, enabledFeatures);
+    public PersonalRules(FeatureSet enabledFeatures, DynamicLike<?> values) {
+        this(enabledFeatures);
         this.load(values);
     }
 
-    public PersonalRules(ServerPlayerEntity owner, FeatureSet enabledFeatures) {
+    public PersonalRules(FeatureSet enabledFeatures) {
         this(
-            owner,
             GameRulesAccess.callStreamAllRules(enabledFeatures)
                 .filter(entry -> SUPPORTED_RULES.contains(entry.getKey()))
                 .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> entry.getValue().createRule())),
             enabledFeatures);
     }
 
-    private PersonalRules(
-        @Nullable ServerPlayerEntity owner,
-        Map<GameRules.Key<?>, GameRules.Rule<?>> rules,
-        FeatureSet enabledFeatures
-    ) {
-        this.owner = owner;
+    private PersonalRules(Map<GameRules.Key<?>, GameRules.Rule<?>> rules, FeatureSet enabledFeatures) {
         this.rules = rules;
         this.enabledFeatures = enabledFeatures;
         this.appliedRules = new HashSet<>();
+    }
+
+    public static void changed(@Nullable ServerPlayerEntity player, GameRules.Key<?> key, GameRules.Rule<?> rule) {
+        if (player != null && RULES_CALLBACKS.containsKey(key)) {
+            RULES_CALLBACKS.get(key).accept(player, rule);
+        }
     }
 
     public NbtCompound toNbt() {
@@ -95,34 +108,13 @@ public final class PersonalRules {
 
     private void load(DynamicLike<?> values) {
         this.rules.forEach((key, rule) -> values.get(key.getName()).asString().ifSuccess(value -> {
-            this.addRule(key);
+            this.applyRule(key);
             ((GameRulesAccess.RuleAccess) rule).callDeserialize(value);
-            this.update(key, rule);
         }));
     }
 
-    public Map<GameRules.Key<?>, GameRules.Rule<?>> getRules() {
-        if (this.owner == null) {
-            return this.rules;
-        }
-
-        return this.rules.entrySet()
-            .stream()
-            .filter(entry -> PersonalRulesManager.isAvailable(entry.getKey(), owner.getPermissionLevel()))
-            .filter(entry -> this.appliedRules.contains(entry.getKey()))
-            .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    public void update(GameRules.Key<?> key, GameRules.Rule<?> rule) {
-        if (this.owner != null && RULES_CALLBACKS.containsKey(key)) {
-            RULES_CALLBACKS.get(key).accept(this.owner, rule);
-        }
-    }
-
     public <T extends GameRules.Rule<T>> Optional<T> get(GameRules.Key<T> key) {
-        if (owner == null ||
-            !PersonalRulesManager.isAvailable(key, owner.getPermissionLevel()) ||
-            !this.appliedRules.contains(key)) {
+        if (!this.appliedRules.contains(key)) {
             return Optional.empty();
         }
 
@@ -142,16 +134,12 @@ public final class PersonalRules {
         return this.get(key).map(GameRules.IntRule::get);
     }
 
-    public <T extends GameRules.Rule<T>> Optional<T> addRule(GameRules.Key<T> key) {
-        if (owner == null || !PersonalRulesManager.isAvailable(key, owner.getPermissionLevel())) {
-            return Optional.empty();
-        }
-
+    public <T extends GameRules.Rule<T>> Optional<T> applyRule(GameRules.Key<T> key) {
         this.appliedRules.add(key);
         return this.get(key);
     }
 
-    public <T extends GameRules.Rule<T>> void removeRule(GameRules.Key<T> key) {
+    public <T extends GameRules.Rule<T>> void revokeRule(GameRules.Key<T> key) {
         this.appliedRules.remove(key);
     }
 }

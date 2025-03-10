@@ -14,18 +14,14 @@ public abstract class MinecraftServerMixin {
 
     @Inject(
         method = "runServer",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/MinecraftServer;setupServer()Z",
-            shift = At.Shift.AFTER))
-    private void onServerFinishSetup(CallbackInfo ci) {
-        PersonalRulesMod.getInstance().onServerStarted((MinecraftServer) (Object) this);
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;setupServer()Z"))
+    private void onServerSetup(CallbackInfo ci) {
+        PersonalRulesMod.getInstance().onServerStarting((MinecraftServer) (Object) this);
     }
 
     @Inject(
-        method = "runServer",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;shutdown()V"))
+        method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;shutdown()V"))
     private void onServerShutdown(CallbackInfo ci) {
-        PersonalRulesMod.getInstance().onServerStopped();
+        PersonalRulesMod.getInstance().onServerStopping();
     }
 }

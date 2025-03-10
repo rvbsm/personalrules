@@ -35,18 +35,13 @@ public abstract class ServerPlayerEntityMixin_personalRules extends PlayerEntity
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void initPersonalRules(CallbackInfo ci) {
-        this.personalRules = new PersonalRules(
-            (ServerPlayerEntity) (Object) this,
-            this.getWorld().getEnabledFeatures());
+        this.personalRules = new PersonalRules(this.getWorld().getEnabledFeatures());
     }
 
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
     private void readPersonalRules(NbtCompound nbt, CallbackInfo ci) {
         final Dynamic<NbtElement> nbtDynamic = new Dynamic<>(NbtOps.INSTANCE, nbt.get(PERSONAL_RULES_KEY));
-        this.personalRules = new PersonalRules(
-            (ServerPlayerEntity) (Object) this,
-            this.getWorld().getEnabledFeatures(),
-            nbtDynamic);
+        this.personalRules = new PersonalRules(this.getWorld().getEnabledFeatures(), nbtDynamic);
     }
 
     @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))

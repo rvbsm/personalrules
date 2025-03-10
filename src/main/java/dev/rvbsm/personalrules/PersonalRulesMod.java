@@ -22,7 +22,13 @@ public final class PersonalRulesMod implements ModInitializer {
 
     private static PersonalRulesMod instance;
 
+    private PersonalRulesManager personalRulesManager;
+
     public static PersonalRulesMod getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("Cannot get an instance before initialisation phase");
+        }
+
         return instance;
     }
 
@@ -33,12 +39,14 @@ public final class PersonalRulesMod implements ModInitializer {
         PersonalRulesTranslation.load(Language.DEFAULT_LANGUAGE); // TODO?: multi-lang
     }
 
-    public void onServerStarted(MinecraftServer server) {
-        PersonalRulesManager.load(server);
+    public void onServerStarting(MinecraftServer server) {
+        this.personalRulesManager = new PersonalRulesManager(server);
+        this.personalRulesManager.load();
     }
 
-    public void onServerStopped() {
-        PersonalRulesManager.unload();
+    public void onServerStopping() {
+        this.personalRulesManager.unload();
+        this.personalRulesManager = null;
     }
 
     public void registerCommands(
@@ -46,6 +54,10 @@ public final class PersonalRulesMod implements ModInitializer {
         CommandManager.RegistrationEnvironment environment,
         CommandRegistryAccess registryAccess
     ) {
-        PersonalRuleCommand.register(dispatcher);
+        PersonalRuleCommand.register(dispatcher, registryAccess);
+    }
+
+    public PersonalRulesManager getPersonalRulesManager() {
+        return this.personalRulesManager;
     }
 }
