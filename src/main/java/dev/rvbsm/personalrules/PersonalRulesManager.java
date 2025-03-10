@@ -1,5 +1,12 @@
 package dev.rvbsm.personalrules;
 
+import com.google.common.collect.ImmutableMap;
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.WorldSavePath;
@@ -8,23 +15,17 @@ import net.minecraft.world.GameRules;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 import dev.rvbsm.personalrules.player.PersonalRules;
 
-import com.google.common.collect.ImmutableMap;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public final class PersonalRulesManager {
 
-    public static final Map<String, GameRules.Key<?>> SUPPORTED_KEYS = PersonalRules.SUPPORTED_RULES.stream()
+    private static final Map<String, GameRules.Key<?>> SUPPORTED_RULE_KEYS = PersonalRules.SUPPORTED_RULES.stream()
         .collect(ImmutableMap.toImmutableMap(GameRules.Key::getName, Function.identity()));
 
-    private static final Map<GameRules.Key<?>, Integer> DEFAULT_CONFIG = ImmutableMap.ofEntries(
+    private static final Map<GameRules.Key<?>, Integer> DEFAULT_RULES = ImmutableMap.ofEntries(
         Map.entry(GameRules.KEEP_INVENTORY, 2),
         Map.entry(GameRules.DO_MOB_LOOT, 2),
         Map.entry(GameRules.PROJECTILES_CAN_BREAK_BLOCKS, 2),
@@ -33,7 +34,7 @@ public final class PersonalRulesManager {
         Map.entry(GameRules.NATURAL_REGENERATION, 2),
         Map.entry(GameRules.REDUCED_DEBUG_INFO, 0),
         Map.entry(GameRules.DO_LIMITED_CRAFTING, 2),
-        Map.entry(GameRules.DISABLE_RAIDS, 4),
+        Map.entry(GameRules.DISABLE_RAIDS, 2),
         Map.entry(GameRules.DO_INSOMNIA, 0),
         Map.entry(GameRules.DO_IMMEDIATE_RESPAWN, 0),
         Map.entry(GameRules.PLAYERS_NETHER_PORTAL_DEFAULT_DELAY, 0),
@@ -52,8 +53,8 @@ public final class PersonalRulesManager {
     private static final String CONFIG_NAME = "personalrules.conf";
 
     private final Path configPath;
-    private Map<GameRules.Key<?>, Integer> personalRules = ImmutableMap.of();
-    private int commandPermissionLevel = 5;
+    private final Object2IntMap<GameRules.Key<?>> personalRules = new Object2IntArrayMap<>(DEFAULT_RULES);
+    private int minimalPermissionLevel = 5;
     private boolean isDirty = false;
 
     public PersonalRulesManager(@NotNull MinecraftServer server) {
@@ -62,80 +63,86 @@ public final class PersonalRulesManager {
 
     public void load() {
         this.readConfig();
-
-        if (this.isDirty) {
-            this.saveConfig();
-        }
+        this.saveConfig(false);
     }
 
     public void unload() {
-        if (this.isDirty) {
-            this.saveConfig();
-        }
-
-        this.personalRules = ImmutableMap.of();
+        this.saveConfig(false);
+        this.personalRules.clear();
     }
 
     private void readConfig() {
-        if (!Files.exists(this.configPath)) {
-            this.personalRules = DEFAULT_CONFIG;
-            this.isDirty = true;
-        } else try (final var reader = Files.newBufferedReader(this.configPath)) {
-            final var parsedRules = new HashMap<GameRules.Key<?>, Integer>();
+        try {
+            if (!Files.exists(this.configPath) || Files.size(this.configPath) == 0) {
+                this.isDirty = true;
 
-            int minPermissionLevel = 5;
-            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                final String[] parsedEntry = line.split("\\s+", 2);
-                if (parsedEntry.length < 2) {
-                    this.isDirty = true;
-                    continue;
-                }
+                return;
+            }
 
-                final GameRules.Key<?> parsedKey = SUPPORTED_KEYS.get(parsedEntry[0]);
-                if (parsedKey == null) {
-                    LOGGER.warn("Unsupported gamerule: {}", parsedEntry[0]);
-                    this.isDirty = true;
-                    continue;
-                }
-
-                final int parsedPermissionLevel;
-                switch (parsedEntry[1]) {
-                    case "true", "0" -> parsedPermissionLevel = 0;
-                    case "1", "2", "3", "4" -> parsedPermissionLevel = Integer.parseInt(parsedEntry[1]);
-                    case "ops" -> parsedPermissionLevel = 4;
-                    case "false" -> parsedPermissionLevel = 5;
-
-                    default -> {
+            int parsedSize = 0;
+            try (final var lines = Files.lines(this.configPath)) {
+                for (final String line : (Iterable<String>) lines::iterator) {
+                    final String[] parsedEntry = line.split("\\s+", 2);
+                    if (parsedEntry.length != 2) {
                         this.isDirty = true;
                         continue;
                     }
+
+                    final GameRules.Key<?> parsedKey = SUPPORTED_RULE_KEYS.get(parsedEntry[0]);
+                    if (parsedKey == null) {
+                        LOGGER.warn("Unsupported personal rule: {}", parsedEntry[0]);
+                        this.isDirty = true;
+                        continue;
+                    }
+
+                    final int parsedPermissionLevel;
+                    switch (parsedEntry[1]) {
+                        case "true", "0" -> parsedPermissionLevel = 0;
+                        case "1", "2", "3", "4" -> parsedPermissionLevel = Integer.parseInt(parsedEntry[1]);
+                        case "ops" -> parsedPermissionLevel = 4;
+                        case "false" -> parsedPermissionLevel = 5;
+
+                        default -> {
+                            LOGGER.warn("Unknown permission level: {}", parsedEntry[1]);
+                            this.isDirty = true;
+                            continue;
+                        }
+                    }
+
+                    this.personalRules.put(parsedKey, parsedPermissionLevel);
+                    this.minimalPermissionLevel = Math.min(this.minimalPermissionLevel, parsedPermissionLevel);
+                    parsedSize++;
                 }
 
-                parsedRules.put(parsedKey, parsedPermissionLevel);
-                minPermissionLevel = Math.min(minPermissionLevel, parsedPermissionLevel);
+                if (this.personalRules.size() != DEFAULT_RULES.size()) {
+                    DEFAULT_RULES.forEach((key, level) -> this.personalRules.putIfAbsent(key, level.intValue()));
+                    this.isDirty = true;
+                } else if (this.personalRules.size() != parsedSize) {
+                    this.isDirty = true;
+                }
             }
-
-            if (parsedRules.size() < PersonalRules.SUPPORTED_RULES.size()) {
-                PersonalRules.SUPPORTED_RULES.stream()
-                    .filter(key -> !parsedRules.containsKey(key))
-                    .forEach(key -> parsedRules.put(key, 5));
-                this.isDirty = true;
-            }
-
-            this.personalRules = ImmutableMap.copyOf(parsedRules);
-            this.commandPermissionLevel = minPermissionLevel;
         } catch (IOException e) {
             LOGGER.warn("Could not parse a config", e);
         }
     }
 
-    private void saveConfig() {
-        try (final var writer = Files.newBufferedWriter(this.configPath)) {
-            for (final GameRules.Key<?> rule : PersonalRules.SUPPORTED_RULES) {
-                final String ruleKey = rule.getName();
-                final int rulePermissionLevel = this.personalRules.get(rule);
+    public void saveConfig(boolean force) {
+        if (!this.isDirty && !force) {
+            return;
+        }
 
-                writer.write("%s %d\n".formatted(ruleKey, rulePermissionLevel));
+        try (final var writer = Files.newBufferedWriter(this.configPath)) {
+            for (final Map.Entry<String, GameRules.Key<?>> ruleEntry : SUPPORTED_RULE_KEYS.entrySet()) {
+                final String ruleKey = ruleEntry.getKey();
+                final int ruleLevel = this.personalRules.getInt(ruleEntry.getValue());
+
+                writer.write("%s %s\n".formatted(
+                    ruleKey, switch (ruleLevel) {
+                        case 0 -> "true";
+                        case 2 -> "ops";
+                        case 5 -> "false";
+                        default -> Integer.toString(ruleLevel, 10);
+                    }));
             }
 
             this.isDirty = false;
@@ -145,10 +152,28 @@ public final class PersonalRulesManager {
     }
 
     public boolean hasPermissionLevel(@NotNull ServerCommandSource src) {
-        return src.isExecutedByPlayer() && src.hasPermissionLevel(this.commandPermissionLevel);
+        return src.isExecutedByPlayer() && src.hasPermissionLevel(this.minimalPermissionLevel);
     }
 
     public boolean hasPermissionLevel(@NotNull ServerCommandSource src, GameRules.Key<?> key) {
-        return src.hasPermissionLevel(this.personalRules.getOrDefault(key, 5));
+        return src.isExecutedByPlayer() && src.hasPermissionLevel(this.personalRules.getInt(key));
+    }
+
+    public int getPermissionLevel(GameRules.Key<?> key) {
+        return this.personalRules.getInt(key);
+    }
+
+    public void updatePermissionLevel(GameRules.Key<?> key, int permissionLevel) {
+        final int prevPermissionLevel = this.personalRules.put(key, permissionLevel);
+
+        if (this.minimalPermissionLevel > permissionLevel) {
+            this.minimalPermissionLevel = permissionLevel;
+            this.isDirty = true;
+        } else if (this.minimalPermissionLevel == prevPermissionLevel) {
+            if (!this.personalRules.containsValue(this.minimalPermissionLevel)) {
+                this.minimalPermissionLevel = permissionLevel;
+                this.isDirty = true;
+            }
+        }
     }
 }
