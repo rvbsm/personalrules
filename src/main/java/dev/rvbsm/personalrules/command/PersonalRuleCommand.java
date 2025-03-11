@@ -1,5 +1,10 @@
 package dev.rvbsm.personalrules.command;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -15,19 +20,17 @@ import dev.rvbsm.personalrules.api.PersonalRulesAccess;
 import dev.rvbsm.personalrules.mixin.rules.GameRulesAccess;
 import dev.rvbsm.personalrules.player.PersonalRules;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
-
 public final class PersonalRuleCommand {
 
     public static void register(
         CommandDispatcher<ServerCommandSource> dispatcher,
         CommandRegistryAccess registryAccess
     ) {
-        final LiteralArgumentBuilder<ServerCommandSource> commandBuilder = CommandManager.literal("personalrule")
+        final var commandBuilder = CommandManager.literal("personalrule")
             .requires(src -> PersonalRulesMod.getInstance().getPersonalRulesManager().hasPermissionLevel(src));
+        final var configBuilder = CommandManager.literal("permission")
+            .requires(src -> src.hasPermissionLevel(2))
+            .then(CommandManager.literal("reload").executes(ctx -> executeConfigReload(ctx.getSource())));
 
         new GameRules(registryAccess.getEnabledFeatures()).accept(new GameRules.Visitor() {
             @Override
@@ -40,10 +43,16 @@ public final class PersonalRuleCommand {
                         .executes(ctx -> executeQuery(ctx.getSource(), key))
                         .then(type.argument("value").executes(ctx -> executeApply(ctx, key)))
                         .then(CommandManager.literal("reset").executes(ctx -> executeRevoke(ctx.getSource(), key))));
+
+                    configBuilder.then(CommandManager.literal(key.getName())
+                        .executes(ctx -> executePermissionQuery(ctx.getSource(), key))
+                        .then(CommandManager.argument("permission_level", IntegerArgumentType.integer(0, 5))
+                            .executes(ctx -> executePermissionSet(ctx, key))));
                 }
             }
         });
 
+        commandBuilder.then(configBuilder.build());
         dispatcher.register(commandBuilder);
     }
 
@@ -117,5 +126,35 @@ public final class PersonalRuleCommand {
                 gameRule.toString())));
 
         return personalRule.map(GameRules.Rule::getCommandResult).orElse(0);
+    }
+
+    private static int executePermissionSet(CommandContext<ServerCommandSource> ctx, GameRules.Key<?> key) {
+        final ServerCommandSource src = ctx.getSource();
+        final int permissionLevel = IntegerArgumentType.getInteger(ctx, "permission_level");
+
+        PersonalRulesMod.getInstance().getPersonalRulesManager().updatePermissionLevel(key, permissionLevel);
+        src.sendMessage(PersonalRulesTranslation.translatable(
+            "command",
+            "personalrule.permission.set.%d".formatted(permissionLevel),
+            key.getName()));
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int executePermissionQuery(ServerCommandSource src, GameRules.Key<?> key) {
+        final int permissionLevel = PersonalRulesMod.getInstance().getPersonalRulesManager().getPermissionLevel(key);
+        src.sendMessage(PersonalRulesTranslation.translatable(
+            "command",
+            "personalrule.permission.query.%d".formatted(permissionLevel),
+            key.getName()));
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int executeConfigReload(ServerCommandSource src) {
+        PersonalRulesMod.getInstance().getPersonalRulesManager().load();
+
+        src.sendMessage(PersonalRulesTranslation.translatable("command", "personalrule.config.reload"));
+        return Command.SINGLE_SUCCESS;
     }
 }

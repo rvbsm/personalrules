@@ -5,5 +5,19 @@
   "personalrules.command.personalrule.query": "Personal rule %s is currently set to: %s (gamerule: %s)",
   "personalrules.command.personalrule.set": "Personal rule %s is now set to: %s (gamerule: %s)",
   "personalrules.command.personalrule.activated": "Personal rule %s is activated and currently set to: %s (gamerule: %s)",
-  "personalrules.command.personalrule.deactivated": "Personal rule %s is deactivated (gamerule: %s)"
+  "personalrules.command.personalrule.deactivated": "Personal rule %s is now disabled (gamerule: %s)",
+
+  "personalrules.command.personalrule.permission.query.0": "Personal rule %s is currently accessible by anyone",
+  "personalrules.command.personalrule.permission.query.1": "Personal rule %s is currently accessible only by moderators",
+  "personalrules.command.personalrule.permission.query.2": "Personal rule %s is currently accessible only by gamemasters",
+  "personalrules.command.personalrule.permission.query.3": "Personal rule %s is currently accessible only by admins",
+  "personalrules.command.personalrule.permission.query.4": "Personal rule %s is currently accessible only by owners",
+  "personalrules.command.personalrule.permission.query.5": "Personal rule %s is currently disabled",
+
+  "personalrules.command.personalrule.permission.set.0": "Personal rule %s is now accessible by anyone",
+  "personalrules.command.personalrule.permission.set.1": "Personal rule %s is now accessible only by moderators",
+  "personalrules.command.personalrule.permission.set.2": "Personal rule %s is now accessible only by gamemasters",
+  "personalrules.command.personalrule.permission.set.3": "Personal rule %s is now accessible only by admins",
+  "personalrules.command.personalrule.permission.set.4": "Personal rule %s is now accessible only by owners",
+  "personalrules.command.personalrule.permission.set.5": "Personal rule %s is now disabled"
 }
