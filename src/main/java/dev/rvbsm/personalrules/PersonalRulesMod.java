@@ -49,6 +49,10 @@ public final class PersonalRulesMod implements ModInitializer {
         this.personalRulesManager = null;
     }
 
+    public void onServerSaving(boolean force) {
+        this.personalRulesManager.saveConfig(force);
+    }
+
     public void registerCommands(
         CommandDispatcher<ServerCommandSource> dispatcher,
         CommandManager.RegistrationEnvironment environment,
