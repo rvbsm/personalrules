@@ -99,7 +99,7 @@ public final class PersonalRulesManager {
                     switch (parsedEntry[1]) {
                         case "true", "0" -> parsedPermissionLevel = 0;
                         case "1", "2", "3", "4" -> parsedPermissionLevel = Integer.parseInt(parsedEntry[1]);
-                        case "ops" -> parsedPermissionLevel = 4;
+                        case "ops" -> parsedPermissionLevel = 2;
                         case "false" -> parsedPermissionLevel = 5;
 
                         default -> {
