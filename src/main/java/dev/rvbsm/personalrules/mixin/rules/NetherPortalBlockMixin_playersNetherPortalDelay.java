@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import net.minecraft.block.NetherPortalBlock;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.GameRules;
 
 import dev.rvbsm.personalrules.player.PersonalRulesHelper;
@@ -25,6 +24,6 @@ public abstract class NetherPortalBlockMixin_playersNetherPortalDelay {
         Operation<Integer> original,
         @Local(argsOnly = true) Entity entity
     ) {
-        return PersonalRulesHelper.integerOrElse((PlayerEntity) entity, rule, instance, original);
+        return PersonalRulesHelper.integerOrElse(entity, rule, instance, original);
     }
 }

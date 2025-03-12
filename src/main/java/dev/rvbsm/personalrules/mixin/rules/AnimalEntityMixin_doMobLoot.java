@@ -27,16 +27,12 @@ public abstract class AnimalEntityMixin_doMobLoot {
             value = "INVOKE",
             target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"))
     private boolean getPersonal(
-        GameRules instance, GameRules.Key<GameRules.BooleanRule> rule, Operation<Boolean> original, @Local(
-            argsOnly = true, ordinal = 1) AnimalEntity other
+        GameRules instance,
+        GameRules.Key<GameRules.BooleanRule> rule,
+        Operation<Boolean> original,
+        @Local(argsOnly = true, ordinal = 1) AnimalEntity other
     ) {
-        final ServerPlayerEntity lovingPlayer = Optional.ofNullable(this.getLovingPlayer())
-            .orElseGet(other::getLovingPlayer);
-
-        if (lovingPlayer == null) {
-            return original.call(instance, rule);
-        }
-
-        return PersonalRulesHelper.booleanOrElse(lovingPlayer, rule, instance, original);
+        final ServerPlayerEntity player = Optional.ofNullable(this.getLovingPlayer()).orElseGet(other::getLovingPlayer);
+        return PersonalRulesHelper.booleanOrElse(player, rule, instance, original);
     }
 }

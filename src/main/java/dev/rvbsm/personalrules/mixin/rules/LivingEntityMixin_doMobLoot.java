@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.GameRules;
 
 import dev.rvbsm.personalrules.player.PersonalRulesHelper;
@@ -27,11 +26,7 @@ public abstract class LivingEntityMixin_doMobLoot {
         Operation<Boolean> original,
         @Local(argsOnly = true) DamageSource source
     ) {
-        if (source.getAttacker() instanceof PlayerEntity player) {
-            return PersonalRulesHelper.booleanOrElse(player, rule, instance, original);
-        }
-
-        return original.call(instance, rule);
+        return PersonalRulesHelper.booleanOrElse(source.getAttacker(), rule, instance, original);
     }
 
     @WrapOperation(
@@ -43,10 +38,6 @@ public abstract class LivingEntityMixin_doMobLoot {
         Operation<Boolean> original,
         @Local(argsOnly = true) @Nullable Entity attacker
     ) {
-        if (attacker instanceof PlayerEntity player) {
-            return PersonalRulesHelper.booleanOrElse(player, rule, instance, original);
-        }
-
-        return original.call(instance, rule);
+        return PersonalRulesHelper.booleanOrElse(attacker, rule, instance, original);
     }
 }

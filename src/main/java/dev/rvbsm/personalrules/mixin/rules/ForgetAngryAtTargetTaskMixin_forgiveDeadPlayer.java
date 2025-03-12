@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.brain.task.ForgetAngryAtTargetTask;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.GameRules;
 
 import dev.rvbsm.personalrules.player.PersonalRulesHelper;
@@ -28,6 +27,6 @@ public abstract class ForgetAngryAtTargetTaskMixin_forgiveDeadPlayer {
         Operation<Boolean> original,
         @Local(argsOnly = true) LivingEntity entity
     ) {
-        return PersonalRulesHelper.booleanOrElse((PlayerEntity) entity, rule, instance, original);
+        return PersonalRulesHelper.booleanOrElse(entity, rule, instance, original);
     }
 }

@@ -32,7 +32,7 @@ public abstract class PlayerEntityMixin_keepInventory extends LivingEntity {
     ) {
         return PersonalRulesHelper.getBoolean((PlayerEntity) (Object) this, rule)
             .or(() -> Optional.ofNullable(this.getPrimeAdversary())
-                .filter(PlayerEntity.class::isInstance)
+                .filter(LivingEntity::isPlayer)
                 .flatMap(adv -> PersonalRulesHelper.getBoolean((PlayerEntity) adv, rule)))
             .orElseGet(() -> original.call(instance, rule));
     }

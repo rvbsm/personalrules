@@ -28,11 +28,7 @@ public abstract class TntBlockMixin_tntExplodes {
         Operation<Boolean> original,
         @Local(argsOnly = true) LivingEntity igniter
     ) {
-        if (igniter instanceof PlayerEntity player) {
-            return PersonalRulesHelper.booleanOrElse(player, rule, instance, original);
-        }
-
-        return original.call(instance, rule);
+        return PersonalRulesHelper.booleanOrElse(igniter, rule, instance, original);
     }
 
     @WrapOperation(
@@ -44,11 +40,7 @@ public abstract class TntBlockMixin_tntExplodes {
         Operation<Boolean> original,
         @Local(argsOnly = true) Explosion explosion
     ) {
-        if (explosion.getCausingEntity() instanceof PlayerEntity player) {
-            return PersonalRulesHelper.booleanOrElse(player, rule, instance, original);
-        }
-
-        return original.call(instance, rule);
+        return PersonalRulesHelper.booleanOrElse(explosion.getCausingEntity(), rule, instance, original);
     }
 
     @WrapOperation(

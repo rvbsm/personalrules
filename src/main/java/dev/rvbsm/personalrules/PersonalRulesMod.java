@@ -44,7 +44,7 @@ public final class PersonalRulesMod implements ModInitializer {
         this.personalRulesManager.load();
     }
 
-    public void onServerStopping() {
+    public void onServerStopped() {
         this.personalRulesManager.unload();
         this.personalRulesManager = null;
     }

@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.GameRules;
 
 import dev.rvbsm.personalrules.player.PersonalRulesHelper;
@@ -26,10 +25,6 @@ public abstract class PaintingEntityMixin_doEntityDrops {
         Operation<Boolean> original,
         @Local(argsOnly = true) @Nullable Entity breaker
     ) {
-        if (breaker instanceof PlayerEntity player) {
-            return PersonalRulesHelper.booleanOrElse(player, rule, instance, original);
-        }
-
-        return original.call(instance, rule);
+        return PersonalRulesHelper.booleanOrElse(breaker, rule, instance, original);
     }
 }

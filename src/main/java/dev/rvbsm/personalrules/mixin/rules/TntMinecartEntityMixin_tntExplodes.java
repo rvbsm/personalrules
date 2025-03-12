@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.TntMinecartEntity;
 import net.minecraft.world.GameRules;
 
@@ -25,10 +24,6 @@ public abstract class TntMinecartEntityMixin_tntExplodes {
         Operation<Boolean> original,
         @Local(argsOnly = true) DamageSource source
     ) {
-        if (source.getAttacker() instanceof PlayerEntity player) {
-            return PersonalRulesHelper.booleanOrElse(player, rule, instance, original);
-        }
-
-        return original.call(instance, rule);
+        return PersonalRulesHelper.booleanOrElse(source.getAttacker(), rule, instance, original);
     }
 }

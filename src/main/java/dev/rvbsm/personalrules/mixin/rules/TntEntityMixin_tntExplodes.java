@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.TntEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.GameRules;
 
 import dev.rvbsm.personalrules.player.PersonalRulesHelper;
@@ -28,10 +27,6 @@ public abstract class TntEntityMixin_tntExplodes {
         GameRules.Key<GameRules.BooleanRule> rule,
         Operation<Boolean> original
     ) {
-        if (this.getOwner() instanceof PlayerEntity player) {
-            return PersonalRulesHelper.booleanOrElse(player, rule, instance, original);
-        }
-
-        return original.call(instance, rule);
+        return PersonalRulesHelper.booleanOrElse(this.getOwner(), rule, instance, original);
     }
 }

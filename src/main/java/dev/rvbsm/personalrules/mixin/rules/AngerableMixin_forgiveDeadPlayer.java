@@ -15,12 +15,15 @@ import dev.rvbsm.personalrules.player.PersonalRulesHelper;
 @Mixin(Angerable.class)
 public interface AngerableMixin_forgiveDeadPlayer {
 
-    @WrapOperation(method = "forgive", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"))
+    @WrapOperation(
+        method = "forgive", at = @At(
+        value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"))
     private boolean getPersonal(
-            GameRules instance,
-            GameRules.Key<GameRules.BooleanRule> rule,
-            Operation<Boolean> original,
-            @Local(argsOnly = true) PlayerEntity player) {
+        GameRules instance,
+        GameRules.Key<GameRules.BooleanRule> rule,
+        Operation<Boolean> original,
+        @Local(argsOnly = true) PlayerEntity player
+    ) {
         return PersonalRulesHelper.booleanOrElse(player, rule, instance, original);
     }
 }

@@ -1,5 +1,14 @@
 package dev.rvbsm.personalrules.mixin.rules;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.Dynamic;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -10,15 +19,6 @@ import net.minecraft.world.World;
 
 import dev.rvbsm.personalrules.api.PersonalRulesAccess;
 import dev.rvbsm.personalrules.player.PersonalRules;
-
-import com.mojang.authlib.GameProfile;
-import com.mojang.serialization.Dynamic;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin_personalRules extends PlayerEntity implements PersonalRulesAccess {

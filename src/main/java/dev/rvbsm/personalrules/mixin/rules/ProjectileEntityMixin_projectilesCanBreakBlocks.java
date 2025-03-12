@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.world.GameRules;
 
@@ -28,10 +27,6 @@ public abstract class ProjectileEntityMixin_projectilesCanBreakBlocks {
         GameRules.Key<GameRules.BooleanRule> rule,
         Operation<Boolean> original
     ) {
-        if (this.getOwner() instanceof PlayerEntity player) {
-            return PersonalRulesHelper.booleanOrElse(player, rule, instance, original);
-        }
-
-        return original.call(instance, rule);
+        return PersonalRulesHelper.booleanOrElse(this.getOwner(), rule, instance, original);
     }
 }
