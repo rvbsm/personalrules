@@ -42,7 +42,6 @@ tasks {
         val properties = mapOf(
             "version" to "$version",
             "javaVersion" to javaVersion,
-            "minecraftVersion" to minecraftProjectVersion,
         )
 
         inputs.properties(properties)
