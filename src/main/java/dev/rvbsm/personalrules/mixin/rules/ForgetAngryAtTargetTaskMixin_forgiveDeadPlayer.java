@@ -19,8 +19,7 @@ public abstract class ForgetAngryAtTargetTaskMixin_forgiveDeadPlayer {
         method = "method_47144",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"),
-        remap = false)
+            target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"))
     private static boolean getPersonal(
         GameRules instance,
         GameRules.Key<GameRules.BooleanRule> rule,
