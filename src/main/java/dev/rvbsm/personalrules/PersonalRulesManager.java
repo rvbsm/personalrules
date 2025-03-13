@@ -48,6 +48,7 @@ public final class PersonalRulesManager {
         Map.entry(GameRules.DO_WARDEN_SPAWNING, 2),
         Map.entry(GameRules.FORGIVE_DEAD_PLAYERS, 0),
         Map.entry(GameRules.ENDER_PEARLS_VANISH_ON_DEATH, 0));
+//        Map.entry(GameRules.TNT_EXPLODES, 0));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonalRulesManager.class);
     private static final String CONFIG_NAME = "personalrules.conf";

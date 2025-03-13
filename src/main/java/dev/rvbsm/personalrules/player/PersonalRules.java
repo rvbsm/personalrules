@@ -45,8 +45,8 @@ public final class PersonalRules {
         GameRules.DO_TRADER_SPAWNING,
         GameRules.DO_WARDEN_SPAWNING,
         GameRules.FORGIVE_DEAD_PLAYERS,
-        GameRules.ENDER_PEARLS_VANISH_ON_DEATH,
-        GameRules.TNT_EXPLODES);
+        GameRules.ENDER_PEARLS_VANISH_ON_DEATH);
+//        GameRules.TNT_EXPLODES);
 
     private static final Map<GameRules.Key<?>, BiConsumer<ServerPlayerEntity, GameRules.Rule<?>>> RULES_CALLBACKS = ImmutableMap.ofEntries(
         Map.entry(
