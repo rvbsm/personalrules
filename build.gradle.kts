@@ -4,8 +4,8 @@ plugins {
 }
 
 private val gitVersion: String by gradle.extra
-private val minecraftProjectVersion: String = "1.21.5-pre2"
-private val minecraftTargetVersion: String = "1.21.5-pre2"
+private val minecraftProjectVersion: String = "1.21.4"
+private val minecraftTargetVersion: String = "1.21.4"
 
 private val javaVersion = property("java.version").toString().toInt(10)
 private val modrinthId = property("mod.modrinth_id").toString()
