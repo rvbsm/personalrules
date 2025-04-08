@@ -49,6 +49,7 @@ doTraderSpawning                  ops
 doWardenSpawning                  ops
 forgiveDeadPlayers                true
 enderPearlsVanishOnDeath          true
+tntExplodes                       true
 ```
 
-[minecraft-wiki-permission-level]: https://minecraft.wiki/w/Permission_level "Permission level"
+[minecraft-wiki-permission-level]: https://minecraft.wiki/w/Permission_level "Permission level – Minecraft Wiki"
