@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "personalrules",
   "version": "${version}",
-  "name": "Personal rules",
-  "description": "Gamerules, but personal!",
+  "name": "Personal Rules",
+  "description": "Gamerules made personal!",
   "authors": [
     "rvbsm"
   ],
