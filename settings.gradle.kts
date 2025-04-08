@@ -14,9 +14,6 @@ plugins {
 }
 
 stonecutter {
-    kotlinController = true
-    centralScript = "build.gradle.kts"
-
     shared {
         vcsVersion = "1.21.5"
         versions("1.21.4", "1.21.5")
