@@ -78,6 +78,7 @@ public final class PersonalRulesManager {
         try {
             if (!Files.exists(this.configPath) || Files.size(this.configPath) == 0) {
                 this.isDirty = true;
+                this.minimalPermissionLevel = 0;
 
                 return;
             }
