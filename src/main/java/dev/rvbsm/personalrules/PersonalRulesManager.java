@@ -49,7 +49,7 @@ public final class PersonalRulesManager {
         .put(GameRules.FORGIVE_DEAD_PLAYERS, 0)
         .put(GameRules.ENDER_PEARLS_VANISH_ON_DEATH, 0)
         //? if >=1.21.5
-        /*.put(GameRules.TNT_EXPLODES, 0)*/
+        .put(GameRules.TNT_EXPLODES, 0)
         .build();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonalRulesManager.class);

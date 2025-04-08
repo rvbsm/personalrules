@@ -36,10 +36,10 @@
     "rules.WanderingTraderManagerMixin_doTraderSpawning",
 
     //? if >=1.21.5 {
-    /*"rules.TntBlockMixin_tntExplodes",
+    "rules.TntBlockMixin_tntExplodes",
     "rules.TntEntityMixin_tntExplodes",
     "rules.TntMinecartEntityMixin_tntExplodes",
-    *///?}
+    //?}
   ],
   "injectors": {
     "defaultRequire": 1

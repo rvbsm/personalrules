@@ -48,7 +48,7 @@ public final class PersonalRules {
         .add(GameRules.FORGIVE_DEAD_PLAYERS)
         .add(GameRules.ENDER_PEARLS_VANISH_ON_DEATH)
         //? if >=1.21.5
-        /*.add(GameRules.TNT_EXPLODES)*/
+        .add(GameRules.TNT_EXPLODES)
         .build();
 
     private static final Map<GameRules.Key<?>, BiConsumer<ServerPlayerEntity, GameRules.Rule<?>>> RULES_CALLBACKS = ImmutableMap.ofEntries(
