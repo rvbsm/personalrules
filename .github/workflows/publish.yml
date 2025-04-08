@@ -25,11 +25,11 @@ jobs:
           echo "$content" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - run: ./gradlew publishMods
+      - run: ./gradlew chiseledPublish
         env:
           CHANGELOG: ${{ env.CHANGELOG }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
       - uses: softprops/action-gh-release@v2
         with:
           body: ${{ env.CHANGELOG }}
-          files: build/libs/*.jar
+          files: versions/*/build/libs/*.jar
