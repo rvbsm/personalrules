@@ -1,6 +1,6 @@
 [versions]
 fabric-loom = "1.10-SNAPSHOT"
-fabric-loader = "0.16.10"
+fabric-loader = "0.16.13"
 
 j52j = "2.0"
 mod-publish = "0.8.3"
