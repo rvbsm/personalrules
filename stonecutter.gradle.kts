@@ -11,6 +11,11 @@ stonecutter registerChiseled tasks.register("chiseledBuild", stonecutter.chisele
     ofTask("build")
 }
 
+stonecutter registerChiseled tasks.register("chiseledPublish", stonecutter.chiseled) {
+    group = "project"
+    ofTask("publishMods")
+}
+
 val gitVersion: String by extra {
     providers.exec {
         executable = "git"
