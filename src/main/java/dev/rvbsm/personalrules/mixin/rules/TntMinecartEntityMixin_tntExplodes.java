@@ -12,18 +12,18 @@ import net.minecraft.world.GameRules;
 
 import dev.rvbsm.personalrules.player.PersonalRulesHelper;
 
-//@Mixin(TntMinecartEntity.class)
+@Mixin(TntMinecartEntity.class)
 public abstract class TntMinecartEntityMixin_tntExplodes {
 
-//    @WrapOperation(
-//        method = {"explode(Lnet/minecraft/entity/damage/DamageSource;D)V", "prime"}, at = @At(
-//        value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"))
-//    private boolean getPersonal(
-//        GameRules instance,
-//        GameRules.Key<GameRules.BooleanRule> rule,
-//        Operation<Boolean> original,
-//        @Local(argsOnly = true) DamageSource source
-//    ) {
-//        return PersonalRulesHelper.booleanOrElse(source.getAttacker(), rule, instance, original);
-//    }
+    @WrapOperation(
+        method = {"explode(Lnet/minecraft/entity/damage/DamageSource;D)V", "prime"}, at = @At(
+        value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"))
+    private boolean getPersonal(
+        GameRules instance,
+        GameRules.Key<GameRules.BooleanRule> rule,
+        Operation<Boolean> original,
+        @Local(argsOnly = true) DamageSource source
+    ) {
+        return PersonalRulesHelper.booleanOrElse(source.getAttacker(), rule, instance, original);
+    }
 }
