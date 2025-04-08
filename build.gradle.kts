@@ -1,11 +1,12 @@
 plugins {
     alias(libs.plugins.fabric.loom)
+    alias(libs.plugins.j52j)
     alias(libs.plugins.publish)
 }
 
-private val gitVersion: String by gradle.extra
-private val minecraftProjectVersion: String = "1.21.5"
-private val minecraftTargetVersion: String = "1.21.5"
+private val gitVersion: String by rootProject.extra
+private val minecraftProjectVersion: String = stonecutter.current.project
+private val minecraftTargetVersion: String = stonecutter.current.version
 
 private val javaVersion = property("java.version").toString().toInt(10)
 private val modrinthId = property("mod.modrinth_id").toString()

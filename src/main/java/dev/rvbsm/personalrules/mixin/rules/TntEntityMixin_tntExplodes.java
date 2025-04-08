@@ -1,6 +1,8 @@
 package dev.rvbsm.personalrules.mixin.rules;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+//? if >=1.21.5 {
+
+/*import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,3 +32,5 @@ public abstract class TntEntityMixin_tntExplodes {
         return PersonalRulesHelper.booleanOrElse(this.getOwner(), rule, instance, original);
     }
 }
+
+*///?}

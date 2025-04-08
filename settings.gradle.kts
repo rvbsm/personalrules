@@ -4,12 +4,22 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven("https://maven.fabricmc.net")
+        maven("https://maven.kikugie.dev/releases")
+        maven("https://maven.kikugie.dev/snapshots")
     }
 }
 
-val gitVersion: String by gradle.extra {
-    providers.exec {
-        executable = "git"
-        args = listOf("describe", "--tags", "--dirty", "--always")
-    }.standardOutput.asText.map { it.trim().drop(1) }.get()
+plugins {
+    id("dev.kikugie.stonecutter") version "0.6-beta.+"
 }
+
+stonecutter {
+    kotlinController = true
+    centralScript = "build.gradle.kts"
+
+    shared {
+        versions("1.21.4", "1.21.5")
+    }
+    create(rootProject)
+}
+

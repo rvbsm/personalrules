@@ -1,5 +1,10 @@
 package dev.rvbsm.personalrules.player;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.mojang.serialization.DynamicLike;
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
@@ -16,37 +21,35 @@ import java.util.function.BiConsumer;
 
 import dev.rvbsm.personalrules.mixin.rules.GameRulesAccess;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.mojang.serialization.DynamicLike;
-import org.jetbrains.annotations.Nullable;
-
 public final class PersonalRules {
 
-    public static final Set<GameRules.Key<?>> SUPPORTED_RULES = ImmutableSet.of(
-        GameRules.KEEP_INVENTORY,
-        GameRules.DO_MOB_LOOT,
-        GameRules.PROJECTILES_CAN_BREAK_BLOCKS,
-        GameRules.DO_TILE_DROPS,
-        GameRules.DO_ENTITY_DROPS,
-        GameRules.NATURAL_REGENERATION,
-        GameRules.REDUCED_DEBUG_INFO,
-        GameRules.DO_LIMITED_CRAFTING,
-        GameRules.DISABLE_RAIDS,
-        GameRules.DO_INSOMNIA,
-        GameRules.DO_IMMEDIATE_RESPAWN,
-        GameRules.PLAYERS_NETHER_PORTAL_DEFAULT_DELAY,
-        GameRules.PLAYERS_NETHER_PORTAL_CREATIVE_DELAY,
-        GameRules.DROWNING_DAMAGE,
-        GameRules.FALL_DAMAGE,
-        GameRules.FIRE_DAMAGE,
-        GameRules.FREEZE_DAMAGE,
-        GameRules.DO_PATROL_SPAWNING,
-        GameRules.DO_TRADER_SPAWNING,
-        GameRules.DO_WARDEN_SPAWNING,
-        GameRules.FORGIVE_DEAD_PLAYERS,
-        GameRules.ENDER_PEARLS_VANISH_ON_DEATH,
-        GameRules.TNT_EXPLODES);
+    // because trailing comma
+    public static final Set<GameRules.Key<?>> SUPPORTED_RULES = ImmutableSet.<GameRules.Key<?>>builder()
+        .add(GameRules.KEEP_INVENTORY)
+        .add(GameRules.DO_MOB_LOOT)
+        .add(GameRules.PROJECTILES_CAN_BREAK_BLOCKS)
+        .add(GameRules.DO_TILE_DROPS)
+        .add(GameRules.DO_ENTITY_DROPS)
+        .add(GameRules.NATURAL_REGENERATION)
+        .add(GameRules.REDUCED_DEBUG_INFO)
+        .add(GameRules.DO_LIMITED_CRAFTING)
+        .add(GameRules.DISABLE_RAIDS)
+        .add(GameRules.DO_INSOMNIA)
+        .add(GameRules.DO_IMMEDIATE_RESPAWN)
+        .add(GameRules.PLAYERS_NETHER_PORTAL_DEFAULT_DELAY)
+        .add(GameRules.PLAYERS_NETHER_PORTAL_CREATIVE_DELAY)
+        .add(GameRules.DROWNING_DAMAGE)
+        .add(GameRules.FALL_DAMAGE)
+        .add(GameRules.FIRE_DAMAGE)
+        .add(GameRules.FREEZE_DAMAGE)
+        .add(GameRules.DO_PATROL_SPAWNING)
+        .add(GameRules.DO_TRADER_SPAWNING)
+        .add(GameRules.DO_WARDEN_SPAWNING)
+        .add(GameRules.FORGIVE_DEAD_PLAYERS)
+        .add(GameRules.ENDER_PEARLS_VANISH_ON_DEATH)
+        //? if >=1.21.5
+        /*.add(GameRules.TNT_EXPLODES)*/
+        .build();
 
     private static final Map<GameRules.Key<?>, BiConsumer<ServerPlayerEntity, GameRules.Rule<?>>> RULES_CALLBACKS = ImmutableMap.ofEntries(
         Map.entry(

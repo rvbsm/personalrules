@@ -25,30 +25,32 @@ public final class PersonalRulesManager {
     private static final Map<String, GameRules.Key<?>> SUPPORTED_RULE_KEYS = PersonalRules.SUPPORTED_RULES.stream()
         .collect(ImmutableMap.toImmutableMap(GameRules.Key::getName, Function.identity()));
 
-    private static final Map<GameRules.Key<?>, Integer> DEFAULT_RULES = ImmutableMap.ofEntries(
-        Map.entry(GameRules.KEEP_INVENTORY, 2),
-        Map.entry(GameRules.DO_MOB_LOOT, 2),
-        Map.entry(GameRules.PROJECTILES_CAN_BREAK_BLOCKS, 2),
-        Map.entry(GameRules.DO_TILE_DROPS, 2),
-        Map.entry(GameRules.DO_ENTITY_DROPS, 2),
-        Map.entry(GameRules.NATURAL_REGENERATION, 2),
-        Map.entry(GameRules.REDUCED_DEBUG_INFO, 0),
-        Map.entry(GameRules.DO_LIMITED_CRAFTING, 2),
-        Map.entry(GameRules.DISABLE_RAIDS, 2),
-        Map.entry(GameRules.DO_INSOMNIA, 0),
-        Map.entry(GameRules.DO_IMMEDIATE_RESPAWN, 0),
-        Map.entry(GameRules.PLAYERS_NETHER_PORTAL_DEFAULT_DELAY, 0),
-        Map.entry(GameRules.PLAYERS_NETHER_PORTAL_CREATIVE_DELAY, 0),
-        Map.entry(GameRules.DROWNING_DAMAGE, 2),
-        Map.entry(GameRules.FALL_DAMAGE, 2),
-        Map.entry(GameRules.FIRE_DAMAGE, 2),
-        Map.entry(GameRules.FREEZE_DAMAGE, 2),
-        Map.entry(GameRules.DO_PATROL_SPAWNING, 2),
-        Map.entry(GameRules.DO_TRADER_SPAWNING, 2),
-        Map.entry(GameRules.DO_WARDEN_SPAWNING, 2),
-        Map.entry(GameRules.FORGIVE_DEAD_PLAYERS, 0),
-        Map.entry(GameRules.ENDER_PEARLS_VANISH_ON_DEATH, 0),
-        Map.entry(GameRules.TNT_EXPLODES, 0));
+    private static final Map<GameRules.Key<?>, Integer> DEFAULT_RULES = ImmutableMap.<GameRules.Key<?>, Integer>builder()
+        .put(GameRules.KEEP_INVENTORY, 2)
+        .put(GameRules.DO_MOB_LOOT, 2)
+        .put(GameRules.PROJECTILES_CAN_BREAK_BLOCKS, 2)
+        .put(GameRules.DO_TILE_DROPS, 2)
+        .put(GameRules.DO_ENTITY_DROPS, 2)
+        .put(GameRules.NATURAL_REGENERATION, 2)
+        .put(GameRules.REDUCED_DEBUG_INFO, 0)
+        .put(GameRules.DO_LIMITED_CRAFTING, 2)
+        .put(GameRules.DISABLE_RAIDS, 2)
+        .put(GameRules.DO_INSOMNIA, 0)
+        .put(GameRules.DO_IMMEDIATE_RESPAWN, 0)
+        .put(GameRules.PLAYERS_NETHER_PORTAL_DEFAULT_DELAY, 0)
+        .put(GameRules.PLAYERS_NETHER_PORTAL_CREATIVE_DELAY, 0)
+        .put(GameRules.DROWNING_DAMAGE, 2)
+        .put(GameRules.FALL_DAMAGE, 2)
+        .put(GameRules.FIRE_DAMAGE, 2)
+        .put(GameRules.FREEZE_DAMAGE, 2)
+        .put(GameRules.DO_PATROL_SPAWNING, 2)
+        .put(GameRules.DO_TRADER_SPAWNING, 2)
+        .put(GameRules.DO_WARDEN_SPAWNING, 2)
+        .put(GameRules.FORGIVE_DEAD_PLAYERS, 0)
+        .put(GameRules.ENDER_PEARLS_VANISH_ON_DEATH, 0)
+        //? if >=1.21.5
+        /*.put(GameRules.TNT_EXPLODES, 0)*/
+        .build();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonalRulesManager.class);
     private static final String CONFIG_NAME = "personalrules.conf";

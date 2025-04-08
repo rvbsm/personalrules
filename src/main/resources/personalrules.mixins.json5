@@ -33,10 +33,13 @@
     "rules.ServerPlayerEntityMixin_keepInventory",
     "rules.ServerPlayerEntityMixin_naturalRegeneration",
     "rules.ServerPlayerEntityMixin_personalRules",
-    "rules.TntBlockMixin_tntExplodes",
+    "rules.WanderingTraderManagerMixin_doTraderSpawning",
+
+    //? if >=1.21.5 {
+    /*"rules.TntBlockMixin_tntExplodes",
     "rules.TntEntityMixin_tntExplodes",
     "rules.TntMinecartEntityMixin_tntExplodes",
-    "rules.WanderingTraderManagerMixin_doTraderSpawning"
+    *///?}
   ],
   "injectors": {
     "defaultRequire": 1
