@@ -43,5 +43,6 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "refmap": "personalrules-refmap.json"
 }
